@@ -181,6 +181,10 @@ def load_ollama_base_url_map(config: Dict[str, Any]) -> Dict[str, str]:
     base_url_map = {}
     for endpoint in ollama_endpoints:
         base_url = endpoint.get("base_url")
+        if not base_url:
+            base_url_env = endpoint.get("base_url_env")
+            if base_url_env:
+                base_url = os.getenv(base_url_env)
         models = endpoint.get("models", [])
         if not base_url or not isinstance(models, list):
             continue

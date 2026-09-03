@@ -356,10 +356,29 @@ def run_experiment(
                     print(f"Loaded existing result for: {model_name}")
                 else:
                     try:
+                        is_ollama_model = (
+                            model_source_map is None
+                            or model_source_map.get(model_name, "ollama") == "ollama"
+                        )
+                        has_explicit_endpoint_mapping = bool(ollama_base_url_map)
+
+                        if is_ollama_model and has_explicit_endpoint_mapping and model_name not in ollama_base_url_map:
+                            raise ValueError(
+                                f"Ollama endpoint missing for model '{model_name}'. "
+                                "When ollama_endpoints/ollama_model_base_urls is configured, "
+                                "every Ollama model must be mapped to avoid localhost fallback."
+                            )
+
                         model_ollama_base_url = (
-                            ollama_base_url_map.get(model_name, "http://localhost:11434")
+                            ollama_base_url_map.get(model_name)
                             if ollama_base_url_map else "http://localhost:11434"
                         )
+                        if not model_ollama_base_url:
+                            model_ollama_base_url = "http://localhost:11434"
+
+                        if is_ollama_model:
+                            print(f"Using Ollama endpoint for {model_name}: {model_ollama_base_url}")
+
                         model_result = run_model_annotation(
                             model_name=model_name, 
                             test_samples=test_samples, 

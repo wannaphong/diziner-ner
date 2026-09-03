@@ -235,17 +235,25 @@ If your Ollama models are hosted on multiple IPs, add `ollama_endpoints` to your
 ```json
 "ollama_endpoints": [
   {
-    "base_url": "http://10.204.100.79:11434",
+    "base_url_env": "OLLAMA_SLURM_BASE_URL",
     "models": ["gpt-oss:20b", "llama3.1:8b"]
   },
   {
-    "base_url": "http://10.204.163.23:11434",
+    "base_url_env": "OLLAMA_PC_BASE_URL",
     "models": ["qwen3.8:27b", "gemma4:12b"]
   }
 ]
 ```
 
-DiZiNER will automatically route each model to its configured `base_url` (fallback: `http://localhost:11434` when unmapped).
+Then export env vars before running:
+
+```bash
+export OLLAMA_SLURM_BASE_URL="http://10.204.100.79:11434"
+export OLLAMA_PC_BASE_URL="http://10.204.163.23:11434"
+```
+
+DiZiNER will automatically route each model to its configured endpoint.  
+If `ollama_endpoints`/`ollama_model_base_urls` is configured, each Ollama model must be mapped; otherwise execution fails fast instead of silently falling back to localhost.
 
 **Supervisor Model**: GPT-4o mini (OpenAI API)
 
