@@ -228,6 +228,25 @@ results = main_iterative_experiment(
 - llama3.1:8b
 - nemotron-nano:8b
 
+**Distributed Ollama Endpoints (different machines)**
+
+If your Ollama models are hosted on multiple IPs, add `ollama_endpoints` to your experiment config (`/home/runner/work/diziner-ner/diziner-ner/experiments_settings/*_default_config.json`):
+
+```json
+"ollama_endpoints": [
+  {
+    "base_url": "http://10.204.100.79:11434",
+    "models": ["gpt-oss:20b", "llama3.1:8b"]
+  },
+  {
+    "base_url": "http://10.204.163.23:11434",
+    "models": ["qwen3.8:27b", "gemma4:12b"]
+  }
+]
+```
+
+DiZiNER will automatically route each model to its configured `base_url` (fallback: `http://localhost:11434` when unmapped).
+
 **Supervisor Model**: GPT-4o mini (OpenAI API)
 
 **Default Configuration**:

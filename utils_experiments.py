@@ -171,6 +171,23 @@ def load_models_from_config(config_path: str) -> Tuple[List[str], Dict[str, str]
     
     return all_models, model_source_map
 
+def load_ollama_base_url_map(config: Dict[str, Any]) -> Dict[str, str]:
+    """Build per-model Ollama base URL map from config."""
+    model_base_urls = config.get("ollama_model_base_urls", {})
+    if model_base_urls:
+        return dict(model_base_urls)
+
+    ollama_endpoints = config.get("ollama_endpoints", [])
+    base_url_map = {}
+    for endpoint in ollama_endpoints:
+        base_url = endpoint.get("base_url")
+        models = endpoint.get("models", [])
+        if not base_url or not isinstance(models, list):
+            continue
+        for model in models:
+            base_url_map[model] = base_url
+    return base_url_map
+
 def load_config(config_path: str) -> Dict[str, Any]:
     """Load configuration from JSON file"""
     with open(config_path, 'r', encoding='utf-8-sig') as f:
@@ -181,6 +198,7 @@ def load_config(config_path: str) -> Dict[str, Any]:
     # Update config with combined models and source mapping
     config['models'] = all_models
     config['model_source_map'] = model_source_map
+    config['ollama_base_url_map'] = load_ollama_base_url_map(config)
 
     return config
 

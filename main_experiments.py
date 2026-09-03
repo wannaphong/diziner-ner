@@ -133,6 +133,7 @@ def run_experiment(
     models: List[str],
     ner_scheme: Dict[str, Any],
     model_source_map: Optional[Dict[str, str]] = None,
+    ollama_base_url_map: Optional[Dict[str, str]] = None,
     group_index: int = 0,
     final_task_goal: Optional[str] = None,
     iteration_number: int = 0,
@@ -355,11 +356,16 @@ def run_experiment(
                     print(f"Loaded existing result for: {model_name}")
                 else:
                     try:
+                        model_ollama_base_url = (
+                            ollama_base_url_map.get(model_name, "http://localhost:11434")
+                            if ollama_base_url_map else "http://localhost:11434"
+                        )
                         model_result = run_model_annotation(
                             model_name=model_name, 
                             test_samples=test_samples, 
                             ner_scheme=ner_scheme, 
                             model_source_map=model_source_map,
+                            ollama_base_url=model_ollama_base_url,
                             final_task_goal=effective_final_goal,
                             supervisor_results_path=supervisor_results_path,
                             iteration_number=iteration_number,
@@ -552,6 +558,8 @@ def run_iterative_annotation_supervisor_cycle(
     dataset_path: str,
     models: List[str],
     ner_scheme: Dict[str, Any],
+    model_source_map: Optional[Dict[str, str]] = None,
+    ollama_base_url_map: Optional[Dict[str, str]] = None,
     max_iterations: int = 3,
     convergence_threshold: Optional[float] = 0.05,
     supervisor_model_name: str = "gpt-5-2025-08-07",
@@ -716,6 +724,8 @@ def run_iterative_annotation_supervisor_cycle(
                 dataset_path=dataset_path,
                 models=current_models,
                 ner_scheme=ner_scheme,
+                model_source_map=model_source_map,
+                ollama_base_url_map=ollama_base_url_map,
                 group_index=current_group_index,
                 iteration_number=iteration,
                 supervisor_results_path=supervisor_results_path,
@@ -936,6 +946,7 @@ def main_iterative_experiment(
 
     # Extract configurations
     model_source_map = config['model_source_map']
+    ollama_base_url_map = config.get('ollama_base_url_map', {})
     models = kwargs.get('models', config['models'])
     ner_scheme = kwargs.get('ner_scheme', config['ner_scheme'])
     
@@ -969,6 +980,7 @@ def main_iterative_experiment(
         benchmark=benchmark,
         models=config['models'],
         model_source_map=model_source_map,
+        ollama_base_url_map=ollama_base_url_map,
         ner_scheme=ner_scheme,
         max_iterations=max_iterations,
         convergence_threshold=convergence_threshold,
